@@ -1,4 +1,4 @@
-pub fn to_camel_case(input: &str) -> String {
+pub fn to_snake_case(input: &str) -> String {
     let chars = input.chars();
     let mut output = String::new();
     let mut prev: Option<char> = None;
