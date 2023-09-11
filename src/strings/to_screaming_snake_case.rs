@@ -19,6 +19,16 @@ pub fn to_screaming_snake_case(input: &str) -> String {
     output
 }
 
+pub trait ToScreamingSnakeCase {
+    fn to_screaming_snake_case(&self) -> String;
+}
+
+impl ToScreamingSnakeCase for &str {
+    fn to_screaming_snake_case(&self) -> String {
+        to_screaming_snake_case(self)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::to_screaming_snake_case;
