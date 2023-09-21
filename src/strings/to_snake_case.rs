@@ -20,7 +20,7 @@ pub fn to_snake_case(input: &str) -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::strings::to_snake_case;
+    use super::to_snake_case;
 
     #[test]
     fn to_camel_case_converts() {
