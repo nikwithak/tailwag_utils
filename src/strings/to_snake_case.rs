@@ -18,6 +18,16 @@ pub fn to_snake_case(input: &str) -> String {
     output
 }
 
+pub trait ToSnakeCase {
+    fn to_snake_case(&self) -> String;
+}
+
+impl ToSnakeCase for &str {
+    fn to_snake_case(&self) -> String {
+        to_snake_case(self)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::to_snake_case;
