@@ -4,7 +4,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-pub mod walk_dir;
+use crate::files::FileWalker;
 
 #[derive(Debug)]
 pub enum TemplateError {
@@ -94,7 +94,7 @@ pub fn create_from_template(
     if output_root_dir.exists() {
         return Err(TemplateError::Unknown("Output directory already exists".into()));
     }
-    let file_walker = walk_dir::FileWalker::new(template_root_dir);
+    let file_walker = FileWalker::new(template_root_dir);
 
     for file in file_walker {
         let mut input = String::new();
@@ -148,7 +148,7 @@ fn test_fill_template() {
 
 #[test]
 fn test_create_template_dir() {
-    use crate::templates::walk_dir::FileWalker;
+    use crate::files::FileWalker;
     // NOTE: Must be manually verified for now. This really just runs t on the `example_templates` directory
     let mut template_dir = std::env::current_dir().unwrap();
     template_dir.push("example_templates");

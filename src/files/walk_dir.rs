@@ -1,7 +1,5 @@
 use std::{
     fs::File,
-    iter::FlatMap,
-    ops::Deref,
     path::{Path, PathBuf},
 };
 
@@ -26,7 +24,7 @@ impl Iterator for FileWalker {
             println!("Found directory: {}", cur_path.as_ref()?.as_os_str().to_str().unwrap());
             let directory = std::fs::read_dir(cur_path?).unwrap();
             for new_path in directory {
-                self.stack.push(new_path.unwrap().path().into());
+                self.stack.push(new_path.unwrap().path());
             }
             cur_path = self.stack.pop();
         }
@@ -41,10 +39,10 @@ impl FileWalker {
     }
 }
 
-impl Into<FileWalker> for &Path {
-    fn into(self) -> FileWalker {
+impl From<&Path> for FileWalker {
+    fn from(val: &Path) -> Self {
         FileWalker {
-            stack: vec![self.to_path_buf()],
+            stack: vec![val.to_path_buf()],
         }
     }
 }
