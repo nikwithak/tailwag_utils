@@ -27,6 +27,11 @@ impl ToSnakeCase for &str {
         to_snake_case(self)
     }
 }
+impl ToSnakeCase for String {
+    fn to_snake_case(&self) -> String {
+        to_snake_case(self)
+    }
+}
 
 #[cfg(test)]
 mod tests {

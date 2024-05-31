@@ -6,5 +6,13 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+log = { version = "0.4.20", features = ["serde"] }
 regex = "1.9.5"
+serde = { version = "1.0.202", features = ["derive"] }
 syn = "2.0.48"
+serde_json = {version = "1.0.117", optional = true}
+reqwest ={version =  "0.12.4", optional = true}
+
+[features]
+default = ["sendgrid"]
+sendgrid = ["dep:reqwest","dep:serde_json"]

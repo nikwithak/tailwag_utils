@@ -1,5 +1,9 @@
 use syn::{Field, GenericArgument, PathArguments, Type, TypePath};
 
+use crate::strings::ToSnakeCase;
+
+use super::attribute_parsing::GetAttribute;
+
 pub trait GetQualifiedPath {
     fn get_qualified_path(&self) -> String;
     fn get_qualified_path_for_option(&self) -> String;
@@ -42,10 +46,10 @@ pub fn get_qualified_path(typepath: &TypePath) -> String {
 
 pub fn is_option(field: &Field) -> bool {
     if let syn::Type::Path(typepath) = &field.ty {
-        match get_qualified_path(typepath).as_str() {
-            "std::option::Option" | "core::option::Option" | "option::Option" | "Option" => true,
-            _ => false,
-        }
+        matches!(
+            get_qualified_path(typepath).as_str(),
+            "std::option::Option" | "core::option::Option" | "option::Option" | "Option"
+        )
     } else {
         false
     }
@@ -82,53 +86,71 @@ pub fn extract_option_type(field: &Field) -> String {
     .unwrap_or(qualified_path)
 }
 
-// pub fn get_type_from_field(field: &Field) -> DatabaseColumnType {
-//     match &field.ty {
-//         syn::Type::Path(typepath) => {
-//             // Match the type - if it's a supported type, we map it to the DatabaseColumnType. If it's not, we either fail (MVP), or we add support for joins via another trait (must impl DatabaseColumnSubType or something).
-//             // TODO: DRY this out using the `is_option` fn above
-//             let mut qualified_path = get_qualified_path(typepath);
-//             qualified_path = match qualified_path.as_str() {
-//                 "std::option::Option" | "core::option::Option" | "option::Option" | "Option" => {
-//                     let type_params = &typepath
-//                         .path
-//                         .segments
-//                         .last()
-//                         .expect("Option should have an inner type")
-//                         .arguments;
-//                     match &type_params {
-//                         PathArguments::AngleBracketed(params) => {
-//                             let arg = params.args.first().expect("No type T found for Option<T>");
-//                             match arg {
-//                                 GenericArgument::Type(syn::Type::Path(t)) => {
-//                                     Some(get_qualified_path(t))
-//                                 },
-//                                 _ => panic!("no type T found for Option<T>"),
-//                             }
-//                         },
-//                         _ => panic!("No type T found for Option<T>"),
-//                     }
-//                 },
-//                 _ => None,
-//             }
-//             .unwrap_or(qualified_path);
+pub enum BaseType {
+    Boolean,
+    Int,
+    Float,
+    String,
+    Timestamp,
+    Uuid,
+    Other,
+}
 
-//             let db_type = match qualified_path.as_str() {
-//                 "std::string::String" | "string::String" | "String" => DatabaseColumnType::String,
-//                 "bool" => DatabaseColumnType::Boolean,
-//                 "u32" | "u64" | "i32" | "i64" | "usize" | "isize" => DatabaseColumnType::Int,
-//                 "f32" | "f64" | "fsize" => DatabaseColumnType::Float,
-//                 "chrono::_" => DatabaseColumnType::Timestamp, // TODO
-//                 "uuid::Uuid" | "Uuid" => DatabaseColumnType::Uuid,
-//                 _ => {
-//                     // TODO: Impl for joinable tables
-//                     unimplemented!("{} not a supported type.", qualified_path)
-//                 },
-//             };
-//             db_type
-//         },
-//         _ => {
-//             unimplemented!("Not a supported data type")
-//         },
-//     }
-// }
+pub fn get_type_from_field(field: &Field) -> BaseType {
+    match &field.ty {
+        syn::Type::Path(typepath) => {
+            // Match the type - if it's a supported type, we map it to the DatabaseColumnType. If it's not, we either fail (MVP), or we add support for joins via another trait (must impl DatabaseColumnSubType or something).
+            // TODO: DRY this out using the `is_option` fn above
+            let mut qualified_path = get_qualified_path(typepath);
+            qualified_path = match qualified_path.as_str() {
+                "std::option::Option" | "core::option::Option" | "option::Option" | "Option" => {
+                    let type_params = &typepath
+                        .path
+                        .segments
+                        .last()
+                        .expect("Option should have an inner type")
+                        .arguments;
+                    match &type_params {
+                        PathArguments::AngleBracketed(params) => {
+                            let arg = params.args.first().expect("No type T found for Option<T>");
+                            match arg {
+                                GenericArgument::Type(syn::Type::Path(t)) => {
+                                    Some(get_qualified_path(t))
+                                },
+                                _ => panic!("no type T found for Option<T>"),
+                            }
+                        },
+                        _ => panic!("No type T found for Option<T>"),
+                    }
+                },
+                _ => None,
+            }
+            .unwrap_or(qualified_path);
+
+            let db_type = {
+                let child_table_name = field
+                    .get_attribute("table_name")
+                    .map(|attr| attr.meta.require_list().unwrap())
+                    .map(|meta| meta.path.get_ident().unwrap())
+                    .map(|path| path.to_string())
+                    .unwrap_or(qualified_path.split("::").last().unwrap().to_snake_case());
+
+                match qualified_path.as_str() {
+                    "std::string::String" | "string::String" | "String" => BaseType::String,
+                    "bool" => BaseType::Boolean,
+                    "u32" | "u64" | "i32" | "i64" | "usize" | "isize" => BaseType::Int,
+                    "f32" | "f64" | "fsize" => BaseType::Float,
+                    // "chrono::DateTime" | "DateTime" => BaseType::Timestamp, // TODO: This doesn't currently work (DateTime is TIMESTAMPTZ not TIMESTAMP)
+                    "chrono::NaiveDateTime" | "NaiveDateTime" => BaseType::Timestamp,
+                    "uuid::Uuid" | "Uuid" => BaseType::Uuid,
+                    // _ => todo!("Unknown type"),
+                    _ => BaseType::Other,
+                }
+            };
+            db_type
+        },
+        _ => {
+            unimplemented!("Not a supported data type")
+        },
+    }
+}
