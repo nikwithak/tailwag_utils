@@ -1,4 +1,4 @@
-// Converts an input to sentence_CASE. Does not filter out any special characters.
+// Converts an input to "Sentence case". Does not filter out any special characters.
 pub fn to_sentence_case(input: &str) -> String {
     let chars = input.chars();
     let mut output = String::new();

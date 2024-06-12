@@ -4,12 +4,15 @@ This crate is a collection of various utility functions and structs. While it is
 a part of the `tailwag` library suite, these utilities function independely of
 that library.
 
-## Details
+Many of these could be their own crates, however I've chosen to consolidate them
+all (for now) into a grab-bag of useful tools.
 
-Better documentation and details to be added later (#TODO @nikwithak).
+## Details
 
 This crate is part of the [`tailwag`](https://www.github.com/nikwithak/tailwag)
 suite of libraries.
+
+Better documentation and details to be added at a later time (#TODO @nikwithak).
 
 ## LICENSE
 
