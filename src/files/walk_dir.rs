@@ -46,5 +46,3 @@ impl From<&Path> for FileWalker {
         }
     }
 }
-
-// fn walk_dir<R>(root: &Path, closure: Fn(File) => R)

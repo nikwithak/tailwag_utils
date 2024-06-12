@@ -8,6 +8,8 @@ pub mod generic_type_map {
     };
 
     #[derive(Default)]
+    /// This is a HashMap that mapes Types (utilizing Rust's `std::any::TypeId`) to an instance of that type.
+    /// Useful for injection dependency patterns and Singleton-esque patterns.
     pub struct TypeInstanceMap {
         data: HashMap<TypeId, Box<dyn Any + Send + Sync>>,
     }

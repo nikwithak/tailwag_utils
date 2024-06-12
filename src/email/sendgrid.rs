@@ -50,6 +50,7 @@ impl SendGridEmailClient {
         body_content: &str,
     ) -> Result<(), SendGridError> {
         let response = reqwest::Client::new()
+            // TODO: Set URL as a config / ENV variable.
             .post("https://api.sendgrid.com/v3/mail/send")
             .header("Authorization", format!("BEARER {}", &self.api_key))
             .header("Content-Type", "application/json")
