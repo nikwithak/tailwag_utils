@@ -26,7 +26,7 @@ impl<'a> GetAttribute<'a> for DeriveInput {
     ) -> Option<&'a Attribute> {
         self.attrs
             .iter()
-            .filter(|a| a.style == AttrStyle::Outer)
+            .filter(|a| matches!(a.style, AttrStyle::Outer))
             .find(|a| a.path().is_ident(attr_name))
     }
 }
