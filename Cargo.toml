@@ -5,6 +5,7 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/nikwithak/tailwag_utils"
 edition = "2021"
 readme = "README.MD"
+description = "A collection of assorted utility functions / traits. Part of the tailwag stack."
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
