@@ -166,7 +166,7 @@ fn test_create_template_dir() {
     )
     .unwrap();
 
-    let files = FileWalker::new(&output_dir);
+    let _files = FileWalker::new(&output_dir);
 
     todo!("This test needs some cleanup. Currently you must manually verify the output is correct in `test_output`");
 }

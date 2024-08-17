@@ -128,7 +128,7 @@ pub fn get_type_from_field(field: &Field) -> BaseType {
             .unwrap_or(qualified_path);
 
             let db_type = {
-                let child_table_name = field
+                let _child_table_name = field
                     .get_attribute("table_name")
                     .map(|attr| attr.meta.require_list().unwrap())
                     .map(|meta| meta.path.get_ident().unwrap())

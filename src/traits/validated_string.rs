@@ -92,6 +92,7 @@ macro_rules! create_validated_string_type {
 }
 
 #[cfg(test)]
+#[allow(unused)]
 mod tests {
     use regex::Regex;
 

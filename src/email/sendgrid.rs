@@ -1,8 +1,4 @@
-use std::{
-    collections::HashMap,
-    env::{self, VarError},
-    fmt::Display,
-};
+use std::{collections::HashMap, env::VarError, fmt::Display};
 
 use reqwest;
 use serde::Serialize;
@@ -101,6 +97,7 @@ struct SendGridPersonalization {
 }
 
 #[derive(Serialize)]
+#[allow(unused)]
 enum SendGridContentType {
     #[serde(rename = "text/plain")]
     Plaintext,
