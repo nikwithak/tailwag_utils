@@ -29,6 +29,12 @@ impl ToScreamingSnakeCase for &str {
     }
 }
 
+impl ToScreamingSnakeCase for String {
+    fn to_screaming_snake_case(&self) -> String {
+        to_screaming_snake_case(self)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::to_screaming_snake_case;
