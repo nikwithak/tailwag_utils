@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 // Converts an input to SCREAMING_SNAKE_CASE. Does not filter out any special characters.
 pub fn to_screaming_snake_case(input: &str) -> String {
     let chars = input.chars();
@@ -23,29 +25,38 @@ pub trait ToScreamingSnakeCase {
     fn to_screaming_snake_case(&self) -> String;
 }
 
-impl ToScreamingSnakeCase for &str {
+impl<T: Display> ToScreamingSnakeCase for T {
     fn to_screaming_snake_case(&self) -> String {
-        to_screaming_snake_case(self)
+        to_screaming_snake_case(&self.to_string())
     }
 }
 
-impl ToScreamingSnakeCase for String {
-    fn to_screaming_snake_case(&self) -> String {
-        to_screaming_snake_case(self)
-    }
-}
+// impl ToScreamingSnakeCase for &str {
+//     fn to_screaming_snake_case(&self) -> String {
+//         to_screaming_snake_case(self)
+//     }
+// }
+
+// impl ToScreamingSnakeCase for String {
+//     fn to_screaming_snake_case(&self) -> String {
+//         to_screaming_snake_case(self)
+//     }
+// }
 
 #[cfg(test)]
 mod tests {
     use super::to_screaming_snake_case;
+    use crate::strings::{to_screaming_snake_case::ToScreamingSnakeCase, ToSnakeCase};
 
     macro_rules! test_case {
         ($input:expr, $expected:expr) => {
-            assert_eq!(to_screaming_snake_case($input), $expected)
+            assert_eq!(to_screaming_snake_case($input), $expected);
+            assert_eq!($input.to_screaming_snake_case(), $expected);
         };
     }
     #[test]
     fn to_camel_case_converts() {
+        assert_eq!("foodTruck".to_screaming_snake_case(), "FOOD_TRUCK");
         test_case!("FoodTruck", "FOOD_TRUCK");
         test_case!("foodTruck", "FOOD_TRUCK");
         test_case!("FOodTRUck", "FOOD_TRUCK");
