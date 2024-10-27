@@ -46,7 +46,7 @@ impl<T: Display> ToScreamingSnakeCase for T {
 #[cfg(test)]
 mod tests {
     use super::to_screaming_snake_case;
-    use crate::strings::{to_screaming_snake_case::ToScreamingSnakeCase, ToSnakeCase};
+    use crate::strings::to_screaming_snake_case::ToScreamingSnakeCase;
 
     macro_rules! test_case {
         ($input:expr, $expected:expr) => {
