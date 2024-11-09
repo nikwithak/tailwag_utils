@@ -1,6 +1,7 @@
 pub mod data_strutures;
 pub mod email;
 pub mod files;
+pub mod iter_tools;
 pub mod macro_utils;
 pub mod maths;
 pub mod strings;
