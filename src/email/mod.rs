@@ -1,10 +1,12 @@
 use std::collections::HashMap;
 
+#[cfg(feature = "sendgrid")]
+use crate::email::sendgrid::SendGridEmailClient;
 use crate::{email::error::EmailError, templates};
 
 pub mod error;
 #[cfg(feature = "sendgrid")]
-pub mod sendgrid;
+mod sendgrid;
 
 pub type EmailAddress = str;
 
@@ -27,6 +29,23 @@ pub trait EmailProvider {
 pub struct EmailClient<T: EmailProvider> {
     provider: T,
     templates: Templates,
+}
+
+// ClientProviders
+#[cfg(feature = "sendgrid")]
+impl EmailClient<SendGridEmailClient> {
+    pub fn new_sendgrid(
+        api_key: String,
+        sender_email: String,
+        templates: Templates,
+    ) -> Self {
+        let provider = SendGridEmailClient::new(api_key, sender_email);
+        Self::new(provider, templates)
+    }
+    pub fn from_env() -> Result<Self, EmailError> {
+        let provider = SendGridEmailClient::from_env()?;
+        Ok(Self::new(provider, Default::default()))
+    }
 }
 
 impl<T: EmailProvider> EmailProvider for EmailClient<T> {
