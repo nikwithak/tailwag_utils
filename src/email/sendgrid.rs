@@ -1,50 +1,21 @@
-use std::{collections::HashMap, env::VarError, fmt::Display};
-
 use reqwest;
 use serde::Serialize;
 
-use crate::templates::{self, TemplateError};
+use crate::email::{error::EmailError, EmailAddress, EmailProvider};
 
-pub struct EmailTemplate {
-    subject: String,
-    body_template: String,
-}
-type TemplateId = String;
-pub type Templates = HashMap<TemplateId, EmailTemplate>;
 pub struct SendGridEmailClient {
     api_key: String,
     sender_email: String,
-    templates: Templates,
 }
 
-impl SendGridEmailClient {
-    pub fn new(
-        api_key: String,
-        sender_email: String,
-        templates: Templates,
-    ) -> Self {
-        Self {
-            api_key,
-            sender_email,
-            templates,
-        }
-    }
-
-    pub fn from_env() -> Result<Self, SendGridError> {
-        let ret = Self {
-            api_key: std::env::var("SENDGRID_API_KEY")?,
-            sender_email: std::env::var("SENDGRID_SENDER_EMAIL")?,
-            templates: Default::default(),
-        };
-        Ok(ret)
-    }
-
-    pub async fn send_email(
+impl EmailProvider for SendGridEmailClient {
+    async fn send_email(
         &self,
-        to: &str,
+        to: &EmailAddress,
         subject: &str,
         body_content: &str,
-    ) -> Result<(), SendGridError> {
+        reply_to: Option<&EmailAddress>,
+    ) -> Result<(), EmailError> {
         let response = reqwest::Client::new()
             // TODO: Set URL as a config / ENV variable.
             .post("https://api.sendgrid.com/v3/mail/send")
@@ -62,19 +33,25 @@ impl SendGridEmailClient {
         response.error_for_status()?;
         Ok(())
     }
+}
 
-    pub async fn send_template(
-        &self,
-        to: &str,
-        template_id: &TemplateId,
-        template_params: &HashMap<String, String>,
-    ) -> Result<(), SendGridError> {
-        let template = self
-            .templates
-            .get(template_id)
-            .ok_or(SendGridError::TemplateNotFound(template_id.clone()))?;
-        let filled_template = templates::fill_template(&template.body_template, template_params)?;
-        self.send_email(to, &template.subject, &filled_template).await
+impl SendGridEmailClient {
+    pub fn new(
+        api_key: String,
+        sender_email: String,
+    ) -> Self {
+        Self {
+            api_key,
+            sender_email,
+        }
+    }
+
+    pub fn from_env() -> Result<Self, EmailError> {
+        let ret = Self {
+            api_key: std::env::var("SENDGRID_API_KEY")?,
+            sender_email: std::env::var("SENDGRID_SENDER_EMAIL")?,
+        };
+        Ok(ret)
     }
 }
 
@@ -110,43 +87,6 @@ struct SendGridContent {
     #[serde(rename = "type")]
     content_type: SendGridContentType,
     value: String,
-}
-
-#[derive(Debug)]
-pub enum SendGridError {
-    Serialization(serde_json::Error),
-    Http(reqwest::Error),
-    Initialization(VarError),
-    TemplateNotFound(TemplateId),
-    TemplateError(TemplateError),
-}
-impl Display for SendGridError {
-    fn fmt(
-        &self,
-        f: &mut std::fmt::Formatter<'_>,
-    ) -> std::fmt::Result {
-        write!(f, "{:?}", self)
-    }
-}
-impl From<TemplateError> for SendGridError {
-    fn from(value: TemplateError) -> Self {
-        SendGridError::TemplateError(value)
-    }
-}
-impl From<VarError> for SendGridError {
-    fn from(value: VarError) -> Self {
-        SendGridError::Initialization(value)
-    }
-}
-impl From<reqwest::Error> for SendGridError {
-    fn from(value: reqwest::Error) -> Self {
-        SendGridError::Http(value)
-    }
-}
-impl From<serde_json::Error> for SendGridError {
-    fn from(value: serde_json::Error) -> Self {
-        SendGridError::Serialization(value)
-    }
 }
 
 // Reference SendGrid API for details
