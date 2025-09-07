@@ -14,6 +14,7 @@ impl EmailProvider for SendGridEmailClient {
         to: &EmailAddress,
         subject: &str,
         body_content: &str,
+        reply_to: Option<&EmailAddress>,
     ) -> Result<(), EmailError> {
         let response = reqwest::Client::new()
             // TODO: Set URL as a config / ENV variable.
